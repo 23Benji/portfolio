@@ -18,14 +18,36 @@ const locoScroll = new LocomotiveScroll({
 
 locoScroll.on("scroll", ScrollTrigger.update);
 
+// Handle smooth scrolling for anchor links using Locomotive Scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    // Tell TypeScript that the clicked element is specifically an anchor tag
+    const targetElement = e.currentTarget as HTMLAnchorElement;
+    const targetId = targetElement.getAttribute('href');
+    
+    if (targetId === '#') {
+      // Scroll to top if href is just "#" (e.g., your logo)
+      locoScroll.scrollTo(0);
+    } else if (targetId) {
+      // Scroll to the specific section
+      const targetSection = document.querySelector(targetId) as HTMLElement;
+      if (targetSection) {
+        locoScroll.scrollTo(targetSection);
+      }
+    }
+  });
+});
+
 ScrollTrigger.scrollerProxy(".smooth-scroll", {
   scrollTop(value) {
-    return arguments.length 
-      ? locoScroll.scrollTo(value as number, { duration: 0, disableLerp: true }) 
+    return arguments.length
+      ? locoScroll.scrollTo(value as number, { duration: 0, disableLerp: true })
       : (locoScroll as any).scroll.instance.scroll.y;
-  }, 
+  },
   getBoundingClientRect() {
-    return {top: 0, left: 0, width: window.innerWidth, height: window.innerHeight};
+    return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
   },
   pinType: (document.querySelector(".smooth-scroll") as HTMLElement).style.transform ? "transform" : "fixed"
 });
@@ -33,9 +55,9 @@ ScrollTrigger.scrollerProxy(".smooth-scroll", {
 /* =========================================
    DATA INJECTION (Skills, Projects, FAQ)
    ========================================= */
-const skills = ["Python", "Java", "JavaScript", "React", "Arduino", "Raspberry Pi", "Flask", "Game Dev", "UI Design", "Prototyping"];
+const skills = ["Python", "Java", "JavaScript", "Angular", "Arduino", "Raspberry Pi", "SQL", "Game Dev", "UI Design", "Prototyping"];
 const projects = [
-  { title: "Desk Jarvis", status: "Prototype", tags: ["React", "Raspberry Pi", "IoT"], desc: "“Something intelligent is about to illuminate your workspace.” A smart desk assistant bridging hardware and software.", visual: "radar", link: "#" },
+  { title: "Desk Jarvis", status: "Prototype", tags: ["Angular", "Raspberry Pi", "IoT"], desc: "“Something intelligent is about to illuminate your workspace.” A smart desk assistant bridging hardware and software.", visual: "radar", link: "https://github.com/23Benji/DeskJarvis-Interface" },
   { title: "Lexipal", status: "Beta", tags: ["Python", "JavaScript", "AI / NLP"], desc: "A personal AI assistant built using Python and Flask-SocketIO. Focuses on learning new languages and having natural conversations.", visual: "blocks", link: "https://github.com/mp3skater/LexiPal" },
   { title: "Jumping Squared", status: "Top Game", tags: ["Java", "Game Design"], desc: "A rage-platformer game where a square jumps over deadly traps to reach the goal. Focused on precise timing and level design.", visual: "wireframe", link: "https://github.com/mp3skater/Jumping-squared" },
   { title: "Tunnel Sim", status: "Simulation", tags: ["Java", "Networking", "Concurrency"], desc: "Simulates visitor flow for a capacity-limited resource (archaeological tunnel) using a client-server architecture and multi-threading.", visual: "nodes", link: "https://github.com/23Benji/TunnelSim" },
@@ -43,8 +65,8 @@ const projects = [
   { title: "Chat Server", status: "Network", tags: ["Java", "Multi-client"], desc: "A multi-client chat server implementing threads to handle concurrent connections, allowing real-time text communication over a network.", visual: "grid", link: "https://github.com/23Benji/ChatServer" }
 ];
 const faqs = [
-  { q: "What kinds of projects do you enjoy?", a: "Things that mix creativity and tech — stuff that moves, reacts, or just makes people say 'wait, how does that work?'" },
-  { q: "What are you currently working on?", a: "Secret... 🤫" },
+  { q: "What kinds of projects do you enjoy?", a: "Things that mix creativity, minimalistic design, and cutting-edge technology — stuff that moves, reacts, or just makes people say 'wait, how does that work?'" },
+  { q: "What are you currently working on?", a: "I am currently working on DeskJarvis-Interface, a smart desk assistant that bridges hardware and software to create an workspace companion." },
   { q: "How do you approach learning new tools?", a: "Jump straight into a project and learn as I go. Breaking things (and fixing them again) is the best teacher." },
   { q: "What kinds of challenges do you enjoy solving?", a: "Making hardware and software talk to each other — especially when it ends up doing something useful or just plain cool." }
 ];
@@ -67,7 +89,7 @@ const getVisualHTML = (type: string) => {
   if (type === 'wireframe') return `<div class="absolute inset-0 flex items-center justify-center [perspective:400px]"><div class="h-16 w-16 border border-white/30 animate-wireframe"></div></div>`;
   if (type === 'nodes') return `<div class="absolute inset-0 flex items-center justify-center"><svg class="absolute h-full w-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20,50 L50,20 L80,50 L50,80 Z" stroke="white" stroke-width="0.5" fill="none"/></svg><div class="h-2 w-2 rounded-full bg-white/50"></div></div>`;
   if (type === 'data') return `<div class="absolute inset-0 flex items-end justify-center gap-1 pb-8 opacity-40"><div class="w-1.5 bg-white animate-data" style="--h: 40px"></div><div class="w-1.5 bg-white animate-data" style="--h: 20px; animation-delay: 0.1s"></div><div class="w-1.5 bg-white animate-data" style="--h: 50px; animation-delay: 0.2s"></div></div>`;
-  return `<div class="absolute inset-0 flex items-center justify-center opacity-30"><div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:16px_16px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]"></div><div class="h-[2px] w-full bg-white/50 blur-[2px]"></div></div>`; 
+  return `<div class="absolute inset-0 flex items-center justify-center opacity-30"><div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:16px_16px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_80%)]"></div><div class="h-[2px] w-full bg-white/50 blur-[2px]"></div></div>`;
 };
 
 const projectGrid = document.getElementById('project-grid')!;
@@ -100,7 +122,7 @@ projects.forEach((proj, i) => {
 
 // FAQs
 const faqContainer = document.getElementById('faq-container')!;
-faqs.forEach((faq, i) => {
+faqs.forEach((faq) => {
   faqContainer.innerHTML += `
     <div class="cinematic-text border-b border-white/10 py-6">
       <button class="faq-btn flex w-full items-center justify-between group">
@@ -126,16 +148,16 @@ document.querySelectorAll('.faq-btn').forEach(btn => {
     const answer = target.nextElementSibling as HTMLElement;
     const icon = target.querySelector('.faq-icon') as HTMLElement;
     const text = target.querySelector('span') as HTMLElement;
-    
+
     const isOpen = answer.classList.contains('is-open');
-    
+
     if (isOpen) {
       gsap.to(answer, { height: 0, opacity: 0, duration: 0.3, ease: "power2.inOut" });
       gsap.to(icon, { rotate: 0, duration: 0.3 });
       text.classList.remove('text-white', 'font-bold');
       text.classList.add('text-white/60');
       answer.classList.remove('is-open');
-      
+
       setTimeout(() => locoScroll.update(), 300); // update locomotive layout after resize
     } else {
       gsap.to(answer, { height: "auto", opacity: 1, duration: 0.3, ease: "power2.inOut" });
@@ -143,7 +165,7 @@ document.querySelectorAll('.faq-btn').forEach(btn => {
       text.classList.add('text-white', 'font-bold');
       text.classList.remove('text-white/60');
       answer.classList.add('is-open');
-      
+
       setTimeout(() => locoScroll.update(), 300); // update locomotive layout after resize
     }
   });
@@ -194,15 +216,15 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
   const time = clock.getElapsedTime();
-  
+
   camera.position.x += (mouseX * 2 - camera.position.x) * 0.03;
   camera.position.y += (mouseY * 2 - camera.position.y) * 0.03;
-  
+
   dotsData.forEach(d => {
     const scale = 1 + Math.sin(time * 2 + d.offset) * 0.4;
     d.mesh.scale.setScalar(scale);
   });
-  
+
   renderer.render(scene, camera);
 }
 animate();
@@ -249,15 +271,16 @@ tlLoad.to("#navbar", { opacity: 1, duration: 1, delay: 0.5 })
 
 // 3. Cinematic Scrub Reveals (Text gently moving up and fading in AS you scroll)
 gsap.utils.toArray('.cinematic-text').forEach((el: any) => {
-  gsap.fromTo(el, 
+  gsap.fromTo(el,
     { opacity: 0, y: 100, filter: 'blur(8px)' },
-    { opacity: 1, y: 0, filter: 'blur(0px)', ease: "none", 
-      scrollTrigger: { 
-        trigger: el, 
+    {
+      opacity: 1, y: 0, filter: 'blur(0px)', ease: "none",
+      scrollTrigger: {
+        trigger: el,
         start: "top 95%",
         end: "top 60%",
         scrub: 1,
-        scroller: ".smooth-scroll" 
+        scroller: ".smooth-scroll"
       }
     }
   );
@@ -296,25 +319,25 @@ gsap.utils.toArray('.scroll-move-right').forEach((el: any) => {
 gsap.utils.toArray('.project-card').forEach((card: any) => {
   gsap.fromTo(card,
     { y: 150, scale: 0.8, opacity: 0 },
-    { y: 0, scale: 1, opacity: 1, ease: "none",
-      scrollTrigger: { 
-        trigger: card, 
-        start: "top 110%", 
-        end: "top 60%", 
+    {
+      y: 0, scale: 1, opacity: 1, ease: "none",
+      scrollTrigger: {
+        trigger: card,
+        start: "top 110%",
+        end: "top 60%",
         scrub: 1,
-        scroller: ".smooth-scroll" 
+        scroller: ".smooth-scroll"
       }
     }
   );
 
-  const inner = card.querySelector('.card-inner');
   const glare = card.querySelector('.glare');
-  
+
   card.addEventListener('mousemove', (e: MouseEvent) => {
     const rect = card.getBoundingClientRect();
     const px = (e.clientX - rect.left) / rect.width;
     const py = (e.clientY - rect.top) / rect.height;
-    
+
     gsap.to(card, { rotateX: (py - 0.5) * -20, rotateY: (px - 0.5) * 20, duration: 0.5, ease: "power2.out" });
     gsap.set(glare, { opacity: 1, background: `radial-gradient(circle at ${px * 100}% ${py * 100}%, rgba(255,255,255,0.4) 0%, transparent 60%)` });
   });
@@ -341,14 +364,14 @@ form.addEventListener('submit', async (e) => {
   submitText.innerText = "Sending...";
   submitBtn.style.opacity = "0.5";
   submitBtn.style.pointerEvents = "none";
-  
+
   try {
     const res = await fetch("https://formspree.io/f/xqapvagk", {
       method: "POST",
       body: new FormData(form),
       headers: { Accept: "application/json" }
     });
-    
+
     if (res.ok) {
       submitText.innerText = "Message Sent!";
       form.reset();
@@ -358,7 +381,7 @@ form.addEventListener('submit', async (e) => {
   } catch (err) {
     submitText.innerText = "Error! Try Again";
   }
-  
+
   setTimeout(() => {
     submitText.innerText = "Send Message";
     submitBtn.style.opacity = "1";
