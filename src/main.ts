@@ -1,10 +1,34 @@
+// @ts-ignore
 import './style.css';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import * as THREE from 'three';
 import { createIcons, ArrowUpRight, Plus } from 'lucide';
+import LocomotiveScroll from 'locomotive-scroll';
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* =========================================
+   LOCOMOTIVE SCROLL INIT & PROXY
+   ========================================= */
+const locoScroll = new LocomotiveScroll({
+  el: document.querySelector(".smooth-scroll") as HTMLElement,
+  smooth: true
+});
+
+locoScroll.on("scroll", ScrollTrigger.update);
+
+ScrollTrigger.scrollerProxy(".smooth-scroll", {
+  scrollTop(value) {
+    return arguments.length 
+      ? locoScroll.scrollTo(value as number, { duration: 0, disableLerp: true }) 
+      : (locoScroll as any).scroll.instance.scroll.y;
+  }, 
+  getBoundingClientRect() {
+    return {top: 0, left: 0, width: window.innerWidth, height: window.innerHeight};
+  },
+  pinType: (document.querySelector(".smooth-scroll") as HTMLElement).style.transform ? "transform" : "fixed"
+});
 
 /* =========================================
    DATA INJECTION (Skills, Projects, FAQ)
@@ -111,12 +135,16 @@ document.querySelectorAll('.faq-btn').forEach(btn => {
       text.classList.remove('text-white', 'font-bold');
       text.classList.add('text-white/60');
       answer.classList.remove('is-open');
+      
+      setTimeout(() => locoScroll.update(), 300); // update locomotive layout after resize
     } else {
       gsap.to(answer, { height: "auto", opacity: 1, duration: 0.3, ease: "power2.inOut" });
       gsap.to(icon, { rotate: 45, duration: 0.3 });
       text.classList.add('text-white', 'font-bold');
       text.classList.remove('text-white/60');
       answer.classList.add('is-open');
+      
+      setTimeout(() => locoScroll.update(), 300); // update locomotive layout after resize
     }
   });
 });
@@ -186,7 +214,7 @@ window.addEventListener('resize', () => {
 });
 
 /* =========================================
-   GSAP ANIMATIONS
+   GSAP ANIMATIONS & LOCOMOTIVE SYNCS
    ========================================= */
 // 1. Custom Cursor
 const cursorRing = document.getElementById('cursor-ring')!;
@@ -212,29 +240,70 @@ document.querySelectorAll('a, button, input, textarea, .faq-btn').forEach(el => 
 });
 
 // 2. Initial Load Sequence
-const tl = gsap.timeline();
-tl.to("#navbar", { opacity: 1, duration: 1, delay: 0.5 })
+const tlLoad = gsap.timeline();
+tlLoad.to("#navbar", { opacity: 1, duration: 1, delay: 0.5 })
   .fromTo(".hero-word", { y: "110%" }, { y: "0%", duration: 0.8, stagger: 0.13, ease: "power4.out" }, "-=0.5")
   .to(".hero-fade", { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 }, "-=0.2")
   .to("#scroll-line", { scaleY: 1, duration: 1.4, ease: "power3.inOut" }, "-=1")
   .to("#scroll-dot", { y: 8, duration: 0.8, repeat: -1, yoyo: true, ease: "power1.inOut" });
 
-// 3. Cinematic Blur Reveals
+// 3. Cinematic Scrub Reveals (Text gently moving up and fading in AS you scroll)
 gsap.utils.toArray('.cinematic-text').forEach((el: any) => {
   gsap.fromTo(el, 
-    { opacity: 0, y: 80, filter: 'blur(10px)' },
-    { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: "power3.out", 
-      scrollTrigger: { trigger: el, start: "top 85%" }
+    { opacity: 0, y: 100, filter: 'blur(8px)' },
+    { opacity: 1, y: 0, filter: 'blur(0px)', ease: "none", 
+      scrollTrigger: { 
+        trigger: el, 
+        start: "top 95%",
+        end: "top 60%",
+        scrub: 1,
+        scroller: ".smooth-scroll" 
+      }
     }
   );
 });
 
-// 4. Project Card Scrub & 3D Hover
+// 4. Horizontal Scrolling Headers (Text moving left/right as you scroll down)
+gsap.utils.toArray('.scroll-move-left').forEach((el: any) => {
+  gsap.to(el, {
+    x: -50, // Reduced from -150
+    ease: "none",
+    scrollTrigger: {
+      trigger: el,
+      scroller: ".smooth-scroll",
+      scrub: 1,
+      start: "top bottom",
+      end: "bottom top"
+    }
+  });
+});
+
+gsap.utils.toArray('.scroll-move-right').forEach((el: any) => {
+  gsap.to(el, {
+    x: 50, // Reduced from 150
+    ease: "none",
+    scrollTrigger: {
+      trigger: el,
+      scroller: ".smooth-scroll",
+      scrub: 1,
+      start: "top bottom",
+      end: "bottom top"
+    }
+  });
+});
+
+// 5. Project Card Scrub & 3D Hover
 gsap.utils.toArray('.project-card').forEach((card: any) => {
   gsap.fromTo(card,
     { y: 150, scale: 0.8, opacity: 0 },
     { y: 0, scale: 1, opacity: 1, ease: "none",
-      scrollTrigger: { trigger: card, start: "top 110%", end: "top 60%", scrub: 1 }
+      scrollTrigger: { 
+        trigger: card, 
+        start: "top 110%", 
+        end: "top 60%", 
+        scrub: 1,
+        scroller: ".smooth-scroll" 
+      }
     }
   );
 
@@ -255,6 +324,10 @@ gsap.utils.toArray('.project-card').forEach((card: any) => {
     gsap.to(glare, { opacity: 0, duration: 0.3 });
   });
 });
+
+// Refresh Locomotive and ScrollTrigger on initialize
+ScrollTrigger.addEventListener("refresh", () => locoScroll.update());
+ScrollTrigger.refresh();
 
 /* =========================================
    FORMSPREE FETCH
